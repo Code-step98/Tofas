@@ -1,0 +1,1216 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+  <meta charset="UTF-8" />
+  <title>منصة الاختبارات البرمجية</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <style>
+    * { 
+      box-sizing: border-box; 
+      font-family: "Segoe UI", Tahoma, sans-serif; 
+    }
+    
+    body { 
+      margin: 0; 
+      background: #f4f6f9; 
+      direction: rtl;
+    }
+    
+    /* ===== Top Bar ===== */
+    .top-bar {
+      background: linear-gradient(90deg, #0f3a5f, #155a8a);
+      color: #fff;
+      padding: 12px 20px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+    
+    .top-left { 
+      display: flex; 
+      gap: 18px; 
+      align-items: center; 
+    }
+    
+    .badge {
+      background: rgba(255, 255, 255, 0.15);
+      padding: 6px 14px;
+      border-radius: 20px;
+      font-size: 14px;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      cursor: default;
+    }
+    
+    .badge.clickable {
+      cursor: pointer;
+      transition: all 0.2s;
+    }
+    
+    .badge.clickable:hover {
+      background: rgba(255, 255, 255, 0.25);
+      transform: translateY(-2px);
+    }
+    
+    .top-right { 
+      display: flex; 
+      gap: 10px; 
+    }
+    
+    .btn {
+      padding: 8px 16px;
+      border: none;
+      border-radius: 20px;
+      cursor: pointer;
+      font-weight: 600;
+      transition: all 0.2s;
+    }
+    
+    .btn.light { 
+      background: #fff; 
+      color: #0f3a5f; 
+    }
+    
+    .btn.light:hover { 
+      background: #f0f0f0; 
+    }
+    
+    .btn.green { 
+      background: #3ec9a7; 
+      color: #003b32; 
+    }
+    
+    .btn.green:hover { 
+      background: #36b696; 
+    }
+    
+    .btn.red {
+      background: #ff6b6b;
+      color: white;
+    }
+    
+    .btn.red:hover {
+      background: #ff5252;
+    }
+    
+    /* ===== Layout ===== */
+    .container { 
+      display: flex; 
+      padding: 20px; 
+      gap: 20px;
+      min-height: calc(100vh - 60px);
+    }
+    
+    /* ===== Left Panel ===== */
+    .left {
+      width: 32%;
+      background: #eef1f5;
+      border-radius: 12px;
+      padding: 20px;
+      box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+      display: flex;
+      flex-direction: column;
+    }
+    
+    .question-header { 
+      display: flex; 
+      justify-content: space-between; 
+      align-items: center; 
+      margin-bottom: 15px;
+    }
+    
+    .status {
+      background: #ffd6d6;
+      color: #b30000;
+      padding: 4px 12px;
+      border-radius: 20px;
+      font-size: 13px;
+      font-weight: 600;
+    }
+    
+    .status.answered {
+      background: #d4f5e9;
+      color: #006644;
+    }
+    
+    .question-text { 
+      margin: 20px 0; 
+      line-height: 1.5; 
+      font-size: 16px;
+      flex-grow: 1;
+    }
+    
+    .view-btn {
+      display: inline-block;
+      margin-top: 15px;
+      background: #fff;
+      border: 1px solid #ccc;
+      padding: 8px 14px;
+      border-radius: 20px;
+      cursor: pointer;
+      font-size: 14px;
+      transition: all 0.2s;
+      text-align: center;
+      width: 100%;
+    }
+    
+    .view-btn:hover {
+      background: #f7f7f7;
+      border-color: #0f3a5f;
+    }
+    
+    /* ===== Right Panel ===== */
+    .right { 
+      width: 68%; 
+      display: flex;
+      flex-direction: column;
+    }
+    
+    .option {
+      background: #fff;
+      border-radius: 12px;
+      padding: 16px;
+      display: flex;
+      gap: 15px;
+      margin-bottom: 15px;
+      border: 2px solid transparent;
+      cursor: pointer;
+      position: relative;
+      box-shadow: 0 2px 5px rgba(0, 0, 0, 0.05);
+      transition: all 0.2s;
+    }
+    
+    .option:hover { 
+      border-color: #0f3a5f; 
+      transform: translateY(-2px);
+      box-shadow: 0 4px 8px rgba(0, 0, 0, 0.08);
+    }
+    
+    .option.active { 
+      border-color: #3ec9a7; 
+      background: #f2fffb; 
+    }
+    
+    .option-number {
+      background: #eef1f5;
+      width: 26px;
+      height: 26px;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-weight: bold;
+      color: #0f3a5f;
+      flex-shrink: 0;
+    }
+    
+    .option.active .option-number {
+      background: #3ec9a7;
+      color: white;
+    }
+    
+    pre {
+      margin: 0;
+      background: #f7f9fb;
+      padding: 12px;
+      border-radius: 8px;
+      font-size: 14px;
+      overflow-x: auto;
+      width: 100%;
+      font-family: "Courier New", monospace;
+      line-height: 1.4;
+      text-align: left;
+      direction: ltr;
+    }
+    
+    /* ===== Questions List Modal ===== */
+    .questions-modal {
+      position: fixed;
+      inset: 0;
+      background: rgba(0, 0, 0, 0.4);
+      display: none;
+      align-items: center;
+      justify-content: center;
+      z-index: 1000;
+      animation: fadeIn 0.3s;
+    }
+    
+    @keyframes fadeIn {
+      from { opacity: 0; }
+      to { opacity: 1; }
+    }
+    
+    .questions-modal-content {
+      background: #fff;
+      padding: 25px;
+      border-radius: 12px;
+      width: 90%;
+      max-width: 700px;
+      box-shadow: 0 10px 25px rgba(0, 0, 0, 0.2);
+      animation: slideUp 0.3s;
+      max-height: 80vh;
+      overflow-y: auto;
+    }
+    
+    @keyframes slideUp {
+      from { transform: translateY(20px); opacity: 0; }
+      to { transform: translateY(0); opacity: 1; }
+    }
+    
+    .questions-modal-content h2 { 
+      margin-top: 0; 
+      margin-bottom: 20px;
+      color: #0f3a5f;
+      text-align: center;
+      padding-bottom: 15px;
+      border-bottom: 2px solid #eef1f5;
+    }
+    
+    .questions-grid {
+      display: grid;
+      grid-template-columns: repeat(5, 1fr);
+      gap: 12px;
+      margin-bottom: 20px;
+    }
+    
+    .question-number {
+      width: 50px;
+      height: 50px;
+      border-radius: 10px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+      font-weight: 600;
+      transition: all 0.2s;
+      background: #f0f3f7;
+      color: #0f3a5f;
+      border: 2px solid transparent;
+      font-size: 16px;
+      margin: 0 auto;
+    }
+    
+    .question-number:hover {
+      background: #e0e5eb;
+      transform: translateY(-3px);
+      box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+    }
+    
+    .question-number.current {
+      background: #3ec9a7;
+      color: white;
+      border-color: #3ec9a7;
+      box-shadow: 0 4px 10px rgba(62, 201, 167, 0.4);
+      transform: scale(1.05);
+    }
+    
+    .question-number.answered {
+      background: #d4f5e9;
+      color: #006644;
+    }
+    
+    .question-number.answered.current {
+      background: #3ec9a7;
+      color: white;
+    }
+    
+    .questions-stats {
+      display: flex;
+      justify-content: space-between;
+      margin-top: 20px;
+      padding: 15px;
+      background: #f8fafc;
+      border-radius: 10px;
+      font-size: 14px;
+    }
+    
+    .stats-item {
+      text-align: center;
+      flex: 1;
+    }
+    
+    .stats-number {
+      font-size: 24px;
+      font-weight: bold;
+      display: block;
+      margin-bottom: 5px;
+    }
+    
+    .answered-stat {
+      color: #006644;
+    }
+    
+    .unanswered-stat {
+      color: #b30000;
+    }
+    
+    .total-stat {
+      color: #0f3a5f;
+    }
+    
+    /* ===== Explanation Modal ===== */
+    .explanation-modal {
+      position: fixed;
+      inset: 0;
+      background: rgba(0, 0, 0, 0.4);
+      display: none;
+      align-items: center;
+      justify-content: center;
+      z-index: 1001;
+      animation: fadeIn 0.3s;
+    }
+    
+    .explanation-modal-content {
+      background: #fff;
+      padding: 25px;
+      border-radius: 12px;
+      width: 90%;
+      max-width: 500px;
+      box-shadow: 0 10px 25px rgba(0, 0, 0, 0.2);
+      animation: slideUp 0.3s;
+    }
+    
+    .explanation-modal-content h3 { 
+      margin-top: 0; 
+      margin-bottom: 15px;
+      color: #0f3a5f;
+    }
+    
+    .explanation-modal-content p {
+      line-height: 1.6;
+      margin-bottom: 20px;
+    }
+    
+    /* ===== Results Modal ===== */
+    .results-modal {
+      position: fixed;
+      inset: 0;
+      background: rgba(0, 0, 0, 0.4);
+      display: none;
+      align-items: center;
+      justify-content: center;
+      z-index: 1002;
+      animation: fadeIn 0.3s;
+    }
+    
+    .results-modal-content {
+      background: #fff;
+      padding: 30px;
+      border-radius: 12px;
+      width: 90%;
+      max-width: 600px;
+      box-shadow: 0 10px 25px rgba(0, 0, 0, 0.2);
+      animation: slideUp 0.3s;
+      text-align: center;
+    }
+    
+    .results-header {
+      margin-bottom: 25px;
+    }
+    
+    .results-header h2 {
+      color: #0f3a5f;
+      margin-bottom: 10px;
+    }
+    
+    .results-score {
+      font-size: 48px;
+      font-weight: bold;
+      color: #3ec9a7;
+      margin: 20px 0;
+    }
+    
+    .results-details {
+      display: flex;
+      justify-content: space-around;
+      margin: 25px 0;
+      padding: 20px;
+      background: #f8fafc;
+      border-radius: 10px;
+    }
+    
+    .detail-item {
+      text-align: center;
+    }
+    
+    .detail-value {
+      font-size: 28px;
+      font-weight: bold;
+      display: block;
+      margin-bottom: 5px;
+    }
+    
+    .correct-value {
+      color: #006644;
+    }
+    
+    .incorrect-value {
+      color: #b30000;
+    }
+    
+    .detail-label {
+      font-size: 14px;
+      color: #666;
+    }
+    
+    .results-actions {
+      margin-top: 25px;
+      display: flex;
+      justify-content: center;
+      gap: 15px;
+    }
+    
+    /* ===== Navigation Buttons ===== */
+    .navigation-buttons {
+      display: flex;
+      justify-content: space-between;
+      margin-top: 20px;
+      padding-top: 15px;
+      border-top: 1px solid #eee;
+    }
+    
+    /* ===== Responsive ===== */
+    @media (max-width: 900px) {
+      .container { 
+        flex-direction: column; 
+        padding: 15px;
+      }
+      
+      .left, .right { 
+        width: 100%; 
+      }
+      
+      .top-left {
+        flex-wrap: wrap;
+        gap: 10px;
+      }
+      
+      .top-right {
+        flex-wrap: wrap;
+      }
+      
+      .questions-grid {
+        grid-template-columns: repeat(4, 1fr);
+      }
+      
+      .question-number {
+        width: 45px;
+        height: 45px;
+      }
+      
+      .results-details {
+        flex-direction: column;
+        gap: 15px;
+      }
+    }
+    
+    @media (max-width: 600px) {
+      .questions-grid {
+        grid-template-columns: repeat(3, 1fr);
+      }
+      
+      .questions-stats {
+        flex-direction: column;
+        gap: 10px;
+      }
+      
+      .top-left .badge {
+        padding: 4px 8px;
+        font-size: 12px;
+      }
+    }
+  </style>
+</head>
+<body>
+  <!-- ===== Top Bar ===== -->
+  <div class="top-bar">
+    <div class="top-left">
+      <div class="badge clickable" onclick="openQuestionsModal()">📋 قائمة الأسئلة</div>
+      <div class="badge">❓ السؤال <span id="currentQuestionNumber">1</span> / 20</div>
+      <div class="badge">⏱ <span id="timer">37</span> دقيقة متبقية</div>
+    </div>
+    <div class="top-right">
+      <button class="btn light" id="prevBtn">السابق</button>
+      <button class="btn light" id="nextBtn">التالي</button>
+      <button class="btn red" id="endTestBtn">إنهاء الاختبار</button>
+    </div>
+  </div>
+  
+  <!-- ===== Content ===== -->
+  <div class="container">
+    <!-- Left Panel -->
+    <div class="left">
+      <!-- Current Question -->
+      <div class="question-header">
+        <strong style="font-size: 18px;">السؤال <span id="questionNumber">1</span></strong>
+        <span class="status" id="statusIndicator">لم يتم الإجابة</span>
+      </div>
+      
+      <div class="question-text" id="questionText">
+        <!-- سيتم تعبئة نص السؤال ديناميكياً -->
+      </div>
+      
+      <div class="view-btn" onclick="openExplanationModal()">عرض شرح الكود</div>
+    </div>
+    
+    <!-- Right Panel -->
+    <div class="right">
+      <h3 style="margin-top: 0; color: #0f3a5f;">اختر الإجابة الصحيحة:</h3>
+      <div id="optionsContainer">
+        <!-- سيتم تعبئة الخيارات ديناميكياً -->
+      </div>
+      
+      <!-- Navigation Buttons -->
+      <div class="navigation-buttons">
+        <button class="btn light" id="prevBtnBottom">السؤال السابق</button>
+        <button class="btn light" id="nextBtnBottom">السؤال التالي</button>
+      </div>
+    </div>
+  </div>
+  
+  <!-- ===== Questions List Modal ===== -->
+  <div class="questions-modal" id="questionsModal">
+    <div class="questions-modal-content">
+      <h2>قائمة الأسئلة</h2>
+      <div class="questions-grid" id="questionsGrid">
+        <!-- سيتم إنشاء أرقام الأسئلة ديناميكياً بواسطة JavaScript -->
+      </div>
+      
+      <div class="questions-stats">
+        <div class="stats-item">
+          <span class="stats-number answered-stat" id="answeredCount">0</span>
+          <span>تم الإجابة</span>
+        </div>
+        <div class="stats-item">
+          <span class="stats-number unanswered-stat" id="unansweredCount">20</span>
+          <span>لم يتم الإجابة</span>
+        </div>
+        <div class="stats-item">
+          <span class="stats-number total-stat" id="totalCount">20</span>
+          <span>إجمالي الأسئلة</span>
+        </div>
+      </div>
+      
+      <div style="text-align: center; margin-top: 20px;">
+        <button class="btn green" onclick="closeQuestionsModal()">إغلاق</button>
+      </div>
+    </div>
+  </div>
+  
+  <!-- ===== Explanation Modal ===== -->
+  <div class="explanation-modal" id="explanationModal">
+    <div class="explanation-modal-content">
+      <h3>شرح الكود</h3>
+      <p id="explanationText">
+        <!-- سيتم تعبئة شرح السؤال ديناميكياً -->
+      </p>
+      <div style="text-align: center; margin-top: 20px;">
+        <button class="btn green" onclick="closeExplanationModal()">إغلاق</button>
+      </div>
+    </div>
+  </div>
+  
+  <!-- ===== Results Modal ===== -->
+  <div class="results-modal" id="resultsModal">
+    <div class="results-modal-content">
+      <div class="results-header">
+        <h2>نتيجة الاختبار</h2>
+        <p>لقد أنهيت الاختبار بنجاح! إليك نتيجتك:</p>
+      </div>
+      
+      <div class="results-score">
+        <span id="finalScore">0</span> / 20
+      </div>
+      
+      <div class="results-details">
+        <div class="detail-item">
+          <span class="detail-value correct-value" id="correctAnswers">0</span>
+          <span class="detail-label">إجابات صحيحة</span>
+        </div>
+        <div class="detail-item">
+          <span class="detail-value incorrect-value" id="incorrectAnswers">0</span>
+          <span class="detail-label">إجابات خاطئة</span>
+        </div>
+        <div class="detail-item">
+          <span class="detail-value" id="percentage">0%</span>
+          <span class="detail-label">النسبة المئوية</span>
+        </div>
+      </div>
+      
+      <div class="results-actions">
+        <button class="btn green" onclick="restartTest()">إعادة الاختبار</button>
+        <button class="btn light" onclick="closeResultsModal()">إغلاق</button>
+      </div>
+    </div>
+  </div>
+  
+  <script>
+    // بيانات الأسئلة الكاملة من الصور
+    const questionsData = [
+      {
+        id: 1,
+        text: 'اختر البرنامج الذي يخرج الناتج التالي:',
+        output: '1.2', // 18 / 15 = 1.2
+        options: [
+          'let num1 = 18;\nlet num2 = 15;\nnum1 / num2;',
+          'let num1 = 18;\nlet num2 = 15;\nconsole.log(num1 / num2);',
+          'let num1 = 18;\nlet num2 = 15;\nnum1 - num2;',
+          'let num1 = 18;\nlet num2 = 15;\nconsole.log(num1 - num2);'
+        ],
+        correct: 2,
+        explanation: 'الإجابة الصحيحة هي الخيار 2 لأنه يستخدم console.log() لعرض نتيجة القسمة. الخيار 1 لا يعرض أي شيء لأنه يفتقد console.log().'
+      },
+      {
+        id: 2,
+        text: 'اختر البرنامج الذي يخرج "Banana":',
+        options: [
+          'let fruit > "Banana";\nfruit;',
+          'let fruit > "Banana";\nconsole.log(fruit);',
+          'let fruit = "Banana";\nfruit;',
+          'let fruit = "Banana";\nconsole.log(fruit);'
+        ],
+        correct: 4,
+        explanation: 'الإجابة الصحيحة هي الخيار 4 لأنه يعرف المتغير بشكل صحيح باستخدام = ويستخدم console.log() لعرض القيمة.'
+      },
+      {
+        id: 3,
+        text: 'اختر البرنامج الذي يخرج "Train" ثم "Bus":',
+        options: [
+          'let vehicle = "Train";\nconsole.log(vehicle);\nvehicle = "Bus";\nconsole.log(vehicle);',
+          'let vehicle = "Train";\nvehicle:\nvehicle < "Bus";\nvehicle;',
+          'let vehicle = "Train";\nconsole.log(vehicle);\nvehicle < "Bus";\nconsole.log(vehicle);',
+          'let vehicle = "Train";\nvehicle:\nvehicle = "Bus";\nvehicle;'
+        ],
+        correct: 1,
+        explanation: 'الإجابة الصحيحة هي الخيار 1 لأنه يعرض "Train" أولاً ثم يغير القيمة إلى "Bus" ويعرضها. < هو عامل مقارنة وليس تعيين.'
+      },
+      {
+        id: 4,
+        text: 'اختر البرنامج الذي يخرج "Discounts are available." بناءً على visitNumber = 5:',
+        options: [
+          'if (visitNumber > 3) {\n  console.log("Discounts are available.");\n} else {\n  console.log("Regular price.");\n}\nlet visitNumber = 5;',
+          'let visitNumber = 5;\nif (visitNumber > 3) {\n  console.log("Discounts are available.");\n} else {\n  console.log("Regular price.");\n}',
+          'if (visitNumber < 3) {\n  console.log("Discounts are available.");\n} else {\n  console.log("Regular price.");\n}\nlet visitNumber = 5;',
+          'let visitNumber = 5;\nif (visitNumber < 3) {\n  console.log("Discounts are available.");\n} else {\n  console.log("Regular price.");\n}'
+        ],
+        correct: 2,
+        explanation: 'الإجابة الصحيحة هي الخيار 2 لأنه يعلن عن المتغير أولاً ثم يتحقق من الشرط (5 > 3) وهو صحيح.'
+      },
+      {
+        id: 5,
+        text: 'اختر البرنامج الذي يخرج "Over capacity" عندما يكون passengers = 12 و additionalPassengers = 4 و capacity = 15:',
+        options: [
+          'let passengers = 12;\nlet additionalPassengers = 4;\nlet capacity = 15;\nelse ((passengers + additionalPassengers) > capacity) { console.log("Over capacity"); } else { console.log("Starting to move."); }',
+          'let passengers = 12;\nlet additionalPassengers = 4;\nlet capacity = 15;\nif ((passengers / additionalPassengers) > capacity) { console.log("Over capacity"); } else { console.log("Starting to move."); }',
+          'let passengers = 12;\nlet additionalPassengers = 4;\nlet capacity = 15;\nif ((passengers + additionalPassengers) > capacity) { console.log("Over capacity"); } else { console.log("Starting to move."); }'
+        ],
+        correct: 3,
+        explanation: 'الإجابة الصحيحة هي الخيار 3 لأنه يجمع الركاب (12+4=16) ويقارن بالسعة (15)، و16 > 15.'
+      },
+      {
+        id: 6,
+        text: 'اختر البرنامج الذي يخرج "My friend is older." عندما يكون myAge = 10 و friendAge = 12:',
+        options: [
+          'let myAge = 10;\nlet friendAge = 12;\nif (myAge > friendAge) {\n  console.log("I\'m older.");\nelse {\n  console.log("My friend is older.");\n}',
+          'let myAge == 10;\nlet friendAge == 12;\nif (myAge > friendAge) {\n  console.log("I\'m older.");\n}\nelse {\n  console.log("My friend is older.");\n}',
+          'let myAge = 10;\nlet friendAge = 12;\nif (myAge > friendAge) {\n  console.log("I\'m older.");\n}\nelse {\n  console.log("My friend is older.");\n}',
+          'let myAge == 10;\nlet friendAge == 12;\nif (myAge > friendAge) {\n  console.log("I\'m older.");\nelse {\n  console.log("My friend is older.");\n}'
+        ],
+        correct: 3,
+        explanation: 'الإجابة الصحيحة هي الخيار 3 لأنه يعرف المتغيرات بشكل صحيح باستخدام = ويتحقق من الشرط (10 > 12) وهو خطأ، فينتقل إلى else.'
+      },
+      {
+        id: 7,
+        text: 'اختر البرنامج الذي يخرج "Charging is not needed." عندما يكون battery = 50:',
+        options: [
+          'let battery = 50;\nif (battery < 20) {\n  console.log("Charging is recommended.");\n} else {\n  console.log("Charging is not needed.");\n}',
+          'let battery = 50;\nif (battery < 20) {\n  console.log("Charging is recommended.");\n} if {\n  console.log("Charging is not needed.");\n}',
+          'let battery = 50;\nif {\n  console.log("Charging is recommended.");\n} if {\n  console.log("Charging is not needed.");\n}'
+        ],
+        correct: 1,
+        explanation: 'الإجابة الصحيحة هي الخيار 1 لأنه يتضمن if-else بشكل صحيح، والشرط (50 < 20) خطأ، فينفذ else.'
+      },
+      {
+        id: 8,
+        text: 'اختر البرنامج الذي يخرج "Proper size" عندما يكون size = 70:',
+        options: [
+          'let size => 70;\nif (size > 100) {\n  console.log("Proper size");\n} else {\n  console.log("Over size limit");\n}',
+          'let size = 70;\nif (size < 100) {\n  console.log("Proper size");\n} else {\n  console.log("Over size limit");\n}',
+          'let size = 70;\nif (size > 100) {\n  console.log("Proper size");\n} else {\n  console.log("Over size limit");\n}',
+          'let size => 70;\nif (size < 100) {\n  console.log("Proper size");\n} else {\n  console.log("Over size limit");\n}'
+        ],
+        correct: 2,
+        explanation: 'الإجابة الصحيحة هي الخيار 2 لأنه يعرف المتغير باستخدام = ويتحقق من الشرط (70 < 100) وهو صحيح.'
+      },
+      {
+        id: 9,
+        text: 'اختر البرنامج الذي يخرج "Please charge." عندما يكون batteryPower = "Empty":',
+        options: [
+          'let batteryPower = "Empty";\nif (batteryPower == "Full") {\n  console.log("No need to charge.");\n} if {\n  console.log("Please charge.");\n}',
+          'let batteryPower = "Empty";\nif (batteryPower = "Full") {\n  console.log("No need to charge.");\n} if {\n  console.log("Please charge.");\n}',
+          'let batteryPower = "Empty";\nif (batteryPower == "Full") {\n  console.log("No need to charge.");\n} else {\n  console.log("Please charge.");\n}',
+          'let batteryPower = "Empty";\nif (batteryPower = "Full") {\n  console.log("No need to charge.");\n} else {\n  console.log("Please charge.");\n}'
+        ],
+        correct: 3,
+        explanation: 'الإجابة الصحيحة هي الخيار 3 لأنه يستخدم == للمقارنة وelse، والشرط ("Empty" == "Full") خطأ، فينفذ else.'
+      },
+      {
+        id: 10,
+        text: 'اختر البرنامج الذي يخرج "Fuel is full." عندما يكون fuel = 100:',
+        options: [
+          'let fuel 100;\nif (fuel == 100) { console.log("Fuel is full."); }',
+          'let fuel 100;\nif (fuel > 100) { console.log("Fuel is full."); }',
+          'let fuel = 100;\nif (fuel > 100) { console.log("Fuel is full."); }',
+          'let fuel = 100;\nif (fuel == 100) { console.log("Fuel is full."); }'
+        ],
+        correct: 4,
+        explanation: 'الإجابة الصحيحة هي الخيار 4 لأنه يعرف المتغير باستخدام = ويتحقق من المساواة (100 == 100) وهو صحيح.'
+      },
+      {
+        id: 11,
+        text: 'اختر البرنامج الذي يخرج "Fuel is full." عندما يكون fuel = 100:',
+        options: [
+          'let fuel 100;\nif (fuel == 100) { console.log("Fuel is full."); }',
+          'let fuel 100;\nif (fuel > 100) { console.log("Fuel is full."); }',
+          'let fuel = 100;\nif (fuel > 100) { console.log("Fuel is full."); }',
+          'let fuel = 100;\nif (fuel == 100) { console.log("Fuel is full."); }'
+        ],
+        correct: 4,
+        explanation: 'الإجابة الصحيحة هي الخيار 4 (مكرر مع سؤال 10 لكن بنفس النمط).'
+      },
+      {
+        id: 12,
+        text: 'اختر البرنامج الذي يخرج "Please charge." عندما يكون batteryPower = "Empty":',
+        options: [
+          'let batteryPower = "Empty";\nif (batteryPower == "Full") {\n  console.log("No need to charge.");\n} if {\n  console.log("Please charge.");\n}',
+          'let batteryPower = "Empty";\nif (batteryPower = "Full") {\n  console.log("No need to charge.");\n} if {\n  console.log("Please charge.");\n}',
+          'let batteryPower = "Empty";\nif (batteryPower == "Full") {\n  console.log("No need to charge.");\n} else {\n  console.log("Please charge.");\n}',
+          'let batteryPower = "Empty";\nif (batteryPower = "Full") {\n  console.log("No need to charge.");\n} else {\n  console.log("Please charge.");\n}'
+        ],
+        correct: 3,
+        explanation: 'الإجابة الصحيحة هي الخيار 3 (مكرر مع سؤال 9).'
+      },
+      {
+        id: 13,
+        text: 'اختر البرنامج الذي يخرج "Your savings have increased." ثم "200,000 yen":',
+        options: [
+          'let savingBalance = "100,000 yen";\nsavingBalance("200,000 yen");\nconsole.log("Your savings have increased.");\nconsole.log(savingBalance);',
+          'let savingBalance = "100,000 yen";\nconsole.log("Your savings have increased.");\nconsole.log(savingBalance);\nsavingBalance("200,000 yen");',
+          'let savingBalance = "100,000 yen";\nconsole.log("Your savings have increased.");\nconsole.log(savingBalance);\nsavingBalance = "200,000 yen";',
+          'let savingBalance = "100,000 yen";\nsavingBalance = "200,000 yen";\nconsole.log("Your savings have increased.");\nconsole.log(savingBalance);'
+        ],
+        correct: 4,
+        explanation: 'الإجابة الصحيحة هي الخيار 4 لأنه يغير قيمة المتغير أولاً ثم يعرض الرسالة والقيمة الجديدة.'
+      },
+      {
+        id: 14,
+        text: 'اختر البرنامج الذي يخرج "Proper size" عندما يكون size = 70:',
+        options: [
+          'let size => 70;\nif (size > 100) {\n  console.log("Proper size");\n} else {\n  console.log("Over size limit");\n}',
+          'let size = 70;\nif (size < 100) {\n  console.log("Proper size");\n} else {\n  console.log("Over size limit");\n}',
+          'let size = 70;\nif (size > 100) {\n  console.log("Proper size");\n} else {\n  console.log("Over size limit");\n}',
+          'let size => 70;\nif (size < 100) {\n  console.log("Proper size");\n} else {\n  console.log("Over size limit");\n}'
+        ],
+        correct: 2,
+        explanation: 'الإجابة الصحيحة هي الخيار 2 (مكرر مع سؤال 8).'
+      },
+      {
+        id: 15,
+        text: 'اختر البرنامج الذي يخرج "Proper size" عندما يكون size = 70:',
+        options: [
+          'let size => 70;\nif (size > 100) {\n  console.log("Proper size");\n} else {\n  console.log("Over size limit");\n}',
+          'let size = 70;\nif (size < 100) {\n  console.log("Proper size");\n} else {\n  console.log("Over size limit");\n}',
+          'let size = 70;\nif (size > 100) {\n  console.log("Proper size");\n} else {\n  console.log("Over size limit");\n}',
+          'let size => 70;\nif (size < 100) {\n  console.log("Proper size");\n} else {\n  console.log("Over size limit");\n}'
+        ],
+        correct: 2,
+        explanation: 'الإجابة الصحيحة هي الخيار 2 (مكرر مع سؤال 8 و 14).'
+      },
+      {
+        id: 16,
+        text: 'اختر البرنامج الذي يخرج "My friend is older." عندما يكون myAge = 10 و friendAge = 12:',
+        options: [
+          'let myAge = 10;\nlet friendAge = 12;\nif (myAge > friendAge) {\n  console.log("I\'m older.");\nelse {\n  console.log("My friend is older.");\n}',
+          'let myAge == 10;\nlet friendAge == 12;\nif (myAge > friendAge) {\n  console.log("I\'m older.");\n}\nelse {\n  console.log("My friend is older.");\n}',
+          'let myAge = 10;\nlet friendAge = 12;\nif (myAge > friendAge) {\n  console.log("I\'m older.");\n}\nelse {\n  console.log("My friend is older.");\n}',
+          'let myAge == 10;\nlet friendAge == 12;\nif (myAge > friendAge) {\n  console.log("I\'m older.");\nelse {\n  console.log("My friend is older.");\n}'
+        ],
+        correct: 3,
+        explanation: 'الإجابة الصحيحة هي الخيار 3 (مكرر مع سؤال 6).'
+      },
+      {
+        id: 17,
+        text: 'اختر البرنامج الذي يخرج "I am going to school.":',
+        options: [
+          'if (timeZone == 8) {\n  "I am going to school.";\n}\nlet timeZone = 8;',
+          'let timeZone = 8;\nif (timeZone == 8) {\n  "I am going to school.";\n}',
+          'if (timeZone == 8) {\n  console.log("I am going to school.");\n}\nlet timeZone = 8;',
+          'let timeZone = 8;\nif (timeZone == 8) {\n  console.log("I am going to school.");\n}'
+        ],
+        correct: 4,
+        explanation: 'الإجابة الصحيحة هي الخيار 4 لأنه يعلن عن المتغير أولاً ويستخدم console.log() داخل الشرط.'
+      },
+      {
+        id: 18,
+        text: 'اختر البرنامج الذي يخرج "Your savings have increased." ثم "200,000 yen":',
+        options: [
+          'let savingBalance = "100,000 yen";\nsavingBalance("200,000 yen");\nconsole.log("Your savings have increased.");\nconsole.log(savingBalance);',
+          'let savingBalance = "100,000 yen";\nconsole.log("Your savings have increased.");\nconsole.log(savingBalance);\nsavingBalance("200,000 yen");',
+          'let savingBalance = "100,000 yen";\nconsole.log("Your savings have increased.");\nconsole.log(savingBalance);\nsavingBalance = "200,000 yen";',
+          'let savingBalance = "100,000 yen";\nsavingBalance = "200,000 yen";\nconsole.log("Your savings have increased.");\nconsole.log(savingBalance);'
+        ],
+        correct: 4,
+        explanation: 'الإجابة الصحيحة هي الخيار 4 (مكرر مع سؤال 13).'
+      },
+      {
+        id: 19,
+        text: 'اختر البرنامج الذي يخرج "The number of apples and oranges is the same." عندما يكون appleNum = 10 و orangeNum = 10:',
+        options: [
+          'if (appleNum == orangeNum) {\n  console.log("The number of apples and oranges is the same.");\nelse {\n  console.log("The number of apples and oranges is not the same.");\n}\nlet appleNum = 10;\nlet orangeNum = 10;',
+          'let appleNum = 10;\nlet orangeNum = 10;\nif (appleNum > orangeNum) {\n  console.log("The number of apples and oranges is the same.");\nelse {\n  console.log("The number of apples and oranges is not the same.");\n}',
+          'let appleNum = 10;\nlet orangeNum = 10;\nif (appleNum == orangeNum) {\n  console.log("The number of apples and oranges is the same.");\nelse {\n  console.log("The number of apples and oranges is not the same.");\n}'
+        ],
+        correct: 3,
+        explanation: 'الإجابة الصحيحة هي الخيار 3 لأنه يعلن عن المتغيرات أولاً ويتحقق من المساواة (10 == 10) وهو صحيح.'
+      },
+      {
+        id: 20,
+        text: 'اختر البرنامج الذي يخرج "Discounts are available." عندما يكون visitNumber = 5:',
+        options: [
+          'if (visitNumber > 3) {\n  console.log("Discounts are available.");\n} else {\n  console.log("Regular price.");\n}\nlet visitNumber = 5;',
+          'let visitNumber = 5;\nif (visitNumber > 3) {\n  console.log("Discounts are available.");\n} else {\n  console.log("Regular price.");\n}',
+          'if (visitNumber < 3) {\n  console.log("Discounts are available.");\n} else {\n  console.log("Regular price.");\n}\nlet visitNumber = 5;',
+          'let visitNumber = 5;\nif (visitNumber < 3) {\n  console.log("Discounts are available.");\n} else {\n  console.log("Regular price.");\n}'
+        ],
+        correct: 2,
+        explanation: 'الإجابة الصحيحة هي الخيار 2 (مكرر مع سؤال 4).'
+      }
+    ];
+
+    // حالة التطبيق
+    let currentQuestion = 1;
+    let userAnswers = {};
+    let timeLeft = 37 * 60; // 37 دقيقة بالثواني
+    let timerInterval;
+
+    // إنشاء قائمة الأسئلة
+    function createQuestionsList() {
+      const questionsGrid = document.getElementById('questionsGrid');
+      questionsGrid.innerHTML = '';
+      
+      for (let i = 1; i <= 20; i++) {
+        const questionDiv = document.createElement('div');
+        questionDiv.className = 'question-number';
+        questionDiv.textContent = i;
+        
+        // تحديد إذا كان السؤال قد تمت الإجابة عليه
+        if (userAnswers[i]) {
+          questionDiv.classList.add('answered');
+        }
+        
+        // تحديد إذا كان هذا هو السؤال الحالي
+        if (i === currentQuestion) {
+          questionDiv.classList.add('current');
+        }
+        
+        questionDiv.addEventListener('click', () => {
+          navigateToQuestion(i);
+          closeQuestionsModal();
+        });
+        questionsGrid.appendChild(questionDiv);
+      }
+      
+      // تحديث الإحصائيات
+      updateQuestionStats();
+    }
+
+    // تحديث إحصائيات الأسئلة
+    function updateQuestionStats() {
+      const answeredCount = Object.keys(userAnswers).length;
+      const unansweredCount = 20 - answeredCount;
+      
+      document.getElementById('answeredCount').textContent = answeredCount;
+      document.getElementById('unansweredCount').textContent = unansweredCount;
+    }
+
+    // فتح نافذة قائمة الأسئلة
+    function openQuestionsModal() {
+      createQuestionsList();
+      document.getElementById('questionsModal').style.display = 'flex';
+    }
+
+    // إغلاق نافذة قائمة الأسئلة
+    function closeQuestionsModal() {
+      document.getElementById('questionsModal').style.display = 'none';
+    }
+
+    // فتح نافذة الشرح
+    function openExplanationModal() {
+      const question = questionsData.find(q => q.id === currentQuestion);
+      document.getElementById('explanationText').textContent = question.explanation;
+      document.getElementById('explanationModal').style.display = 'flex';
+    }
+
+    // إغلاق نافذة الشرح
+    function closeExplanationModal() {
+      document.getElementById('explanationModal').style.display = 'none';
+    }
+
+    // فتح نافذة النتائج
+    function openResultsModal() {
+      // حساب النتيجة
+      let correctCount = 0;
+      for (let i = 1; i <= 20; i++) {
+        if (userAnswers[i] === questionsData.find(q => q.id === i).correct) {
+          correctCount++;
+        }
+      }
+      
+      const percentage = Math.round((correctCount / 20) * 100);
+      
+      // تحديث عناصر النتيجة
+      document.getElementById('finalScore').textContent = correctCount;
+      document.getElementById('correctAnswers').textContent = correctCount;
+      document.getElementById('incorrectAnswers').textContent = 20 - correctCount;
+      document.getElementById('percentage').textContent = `${percentage}%`;
+      
+      // إيقاف المؤقت
+      clearInterval(timerInterval);
+      
+      // عرض نافذة النتائج
+      document.getElementById('resultsModal').style.display = 'flex';
+    }
+
+    // إغلاق نافذة النتائج
+    function closeResultsModal() {
+      document.getElementById('resultsModal').style.display = 'none';
+    }
+
+    // إعادة بدء الاختبار
+    function restartTest() {
+      // إعادة تعيين البيانات
+      userAnswers = {};
+      currentQuestion = 1;
+      timeLeft = 37 * 60;
+      
+      // إغلاق النوافذ
+      closeResultsModal();
+      
+      // إعادة تعيين العرض
+      updateQuestionDisplay();
+      startTimer();
+      
+      // تحديث الإحصائيات
+      updateQuestionStats();
+    }
+
+    // الانتقال إلى سؤال محدد
+    function navigateToQuestion(questionNumber) {
+      // تحديث السؤال الحالي
+      currentQuestion = questionNumber;
+      
+      // تحديث واجهة المستخدم
+      updateQuestionDisplay();
+    }
+
+    // تحديث عرض السؤال
+    function updateQuestionDisplay() {
+      const question = questionsData.find(q => q.id === currentQuestion);
+      
+      // تحديث الأرقام
+      document.getElementById('currentQuestionNumber').textContent = currentQuestion;
+      document.getElementById('questionNumber').textContent = currentQuestion;
+      
+      // تحديث نص السؤال
+      const questionTextElement = document.getElementById('questionText');
+      if (question.output) {
+        questionTextElement.innerHTML = `<b>${question.text}</b><br><br>${question.output}`;
+      } else {
+        questionTextElement.innerHTML = `<b>${question.text}</b>`;
+      }
+      
+      // تحديث حالة الإجابة
+      const statusIndicator = document.getElementById('statusIndicator');
+      
+      if (userAnswers[currentQuestion]) {
+        statusIndicator.textContent = 'تم الإجابة';
+        statusIndicator.classList.add('answered');
+      } else {
+        statusIndicator.textContent = 'لم يتم الإجابة';
+        statusIndicator.classList.remove('answered');
+      }
+      
+      // تحديث الخيارات
+      const optionsContainer = document.getElementById('optionsContainer');
+      optionsContainer.innerHTML = '';
+      
+      question.options.forEach((option, index) => {
+        const optionDiv = document.createElement('div');
+        optionDiv.className = 'option';
+        if (userAnswers[currentQuestion] === index + 1) {
+          optionDiv.classList.add('active');
+        }
+        
+        optionDiv.onclick = () => selectOption(optionDiv, index + 1);
+        
+        optionDiv.innerHTML = `
+          <div class="option-number">${index + 1}</div>
+          <pre>${option}</pre>
+        `;
+        
+        optionsContainer.appendChild(optionDiv);
+      });
+    }
+
+    // تحديد خيار
+    function selectOption(el, optionNumber) {
+      // إزالة النشط من جميع الخيارات
+      document.querySelectorAll('#optionsContainer .option').forEach(o => {
+        o.classList.remove('active');
+      });
+      
+      // إضافة النشط للخيار المحدد
+      el.classList.add('active');
+      
+      // تحديث حالة السؤال
+      const statusIndicator = document.getElementById('statusIndicator');
+      statusIndicator.textContent = 'تم الإجابة';
+      statusIndicator.classList.add('answered');
+      
+      // تخزين الإجابة
+      userAnswers[currentQuestion] = optionNumber;
+      
+      // تحديث الإحصائيات
+      updateQuestionStats();
+    }
+
+    // التنقل بين الأسئلة
+    function navigateNext() {
+      if (currentQuestion < 20) {
+        navigateToQuestion(currentQuestion + 1);
+      }
+    }
+
+    function navigatePrev() {
+      if (currentQuestion > 1) {
+        navigateToQuestion(currentQuestion - 1);
+      }
+    }
+
+    // بدء المؤقت
+    function startTimer() {
+      clearInterval(timerInterval);
+      
+      timerInterval = setInterval(() => {
+        timeLeft--;
+        
+        const minutes = Math.floor(timeLeft / 60);
+        const seconds = timeLeft % 60;
+        
+        document.getElementById('timer').textContent = minutes;
+        
+        if (timeLeft <= 0) {
+          clearInterval(timerInterval);
+          openResultsModal();
+        }
+      }, 1000);
+    }
+
+    // إنهاء الاختبار
+    function endTest() {
+      if (Object.keys(userAnswers).length < 10) {
+        const confirmEnd = confirm('لقد أجبت على ' + Object.keys(userAnswers).length + ' سؤال فقط من أصل 20. هل تريد إنهاء الاختبار الآن؟');
+        if (!confirmEnd) return;
+      }
+      
+      openResultsModal();
+    }
+
+    // تهيئة الصفحة
+    function init() {
+      // تحديث عرض السؤال الحالي
+      updateQuestionDisplay();
+      
+      // بدء المؤقت
+      startTimer();
+      
+      // إضافة مستمعي الأحداث للأزرار
+      document.getElementById('prevBtn').addEventListener('click', navigatePrev);
+      document.getElementById('nextBtn').addEventListener('click', navigateNext);
+      document.getElementById('prevBtnBottom').addEventListener('click', navigatePrev);
+      document.getElementById('nextBtnBottom').addEventListener('click', navigateNext);
+      document.getElementById('endTestBtn').addEventListener('click', endTest);
+      
+      // إغلاق النوافذ عند النقر خارجها
+      document.getElementById('questionsModal').addEventListener('click', function(e) {
+        if (e.target === this) {
+          closeQuestionsModal();
+        }
+      });
+      
+      document.getElementById('explanationModal').addEventListener('click', function(e) {
+        if (e.target === this) {
+          closeExplanationModal();
+        }
+      });
+      
+      document.getElementById('resultsModal').addEventListener('click', function(e) {
+        if (e.target === this) {
+          closeResultsModal();
+        }
+      });
+      
+      // اختصارات لوحة المفاتيح
+      document.addEventListener('keydown', function(e) {
+        // زر Escape لإغلاق النوافذ
+        if (e.key === 'Escape') {
+          if (document.getElementById('questionsModal').style.display === 'flex') {
+            closeQuestionsModal();
+          }
+          if (document.getElementById('explanationModal').style.display === 'flex') {
+            closeExplanationModal();
+          }
+          if (document.getElementById('resultsModal').style.display === 'flex') {
+            closeResultsModal();
+          }
+        }
+        
+        // الأسهم للتنقل بين الأسئلة
+        if (e.key === 'ArrowRight' || e.key === 'd') {
+          navigateNext();
+        }
+        
+        if (e.key === 'ArrowLeft' || e.key === 'a') {
+          navigatePrev();
+        }
+        
+        // L لفتح قائمة الأسئلة
+        if (e.key === 'l' || e.key === 'L') {
+          openQuestionsModal();
+        }
+        
+        // E لإنهاء الاختبار
+        if (e.key === 'e' || e.key === 'E') {
+          endTest();
+        }
+        
+        // الأرقام 1-4 لتحديد الخيارات
+        if (e.key >= '1' && e.key <= '4' && document.getElementById('explanationModal').style.display === 'none') {
+          const optionNumber = parseInt(e.key);
+          const optionElements = document.querySelectorAll('#optionsContainer .option');
+          if (optionElements.length >= optionNumber) {
+            selectOption(optionElements[optionNumber - 1], optionNumber);
+          }
+        }
+      });
+      
+      // تحديث الإحصائيات
+      updateQuestionStats();
+    }
+
+    // تهيئة التطبيق عند تحميل الصفحة
+    window.addEventListener('DOMContentLoaded', init);
+  </script>
+</body>
+</html>
